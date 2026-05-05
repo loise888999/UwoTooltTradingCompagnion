@@ -1,0 +1,4 @@
+{
+  "ocrBackendRepo": "https://github.com/your-org/your-ocr-backend-repo.git",
+  "frontendRepo": "https://github.com/your-org/your-frontend-repo.git"
+}

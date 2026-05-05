@@ -1,0 +1,96 @@
+name: Release Windows App
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (example: v1.0.0)"
+        required: true
+      ocr_backend_repo:
+        description: "Git URL for OCR backend repo"
+        required: true
+      ocr_backend_ref:
+        description: "Branch/tag/commit for OCR backend"
+        required: false
+        default: "main"
+      frontend_repo:
+        description: "Git URL for frontend repo"
+        required: true
+      frontend_ref:
+        description: "Branch/tag/commit for frontend"
+        required: false
+        default: "main"
+      backend_entry:
+        description: "Backend startup file path relative to backend repo"
+        required: false
+        default: "server.js"
+      frontend_url:
+        description: "Optional URL to load in Electron instead of bundled backend URL"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout shell repo
+        uses: actions/checkout@v4
+
+      - name: Validate release tag format
+        shell: bash
+        run: |
+          if [[ ! "${{ github.event.inputs.release_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "release_tag must match semver format like v1.2.3"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Clone OCR backend repo
+        shell: bash
+        env:
+          REPO_TOKEN: ${{ secrets.EXTERNAL_REPO_TOKEN }}
+        run: |
+          node scripts/clone-repo.js "${{ github.event.inputs.ocr_backend_repo }}" "${{ github.event.inputs.ocr_backend_ref }}" "external/ocr-backend"
+
+      - name: Clone frontend repo
+        shell: bash
+        env:
+          REPO_TOKEN: ${{ secrets.EXTERNAL_REPO_TOKEN }}
+        run: |
+          node scripts/clone-repo.js "${{ github.event.inputs.frontend_repo }}" "${{ github.event.inputs.frontend_ref }}" "external/frontend"
+
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Prepare bundle from external repos
+        shell: bash
+        env:
+          OCR_BACKEND_ENTRY_REL: ${{ github.event.inputs.backend_entry }}
+          FRONTEND_URL: ${{ github.event.inputs.frontend_url }}
+        run: node scripts/prepare-bundle.js
+
+      - name: Verify bundle layout
+        shell: bash
+        run: node scripts/verify-bundle.js
+
+      - name: Build Windows installer
+        run: npm run build:win
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          name: ${{ github.event.inputs.release_tag }}
+          generate_release_notes: true
+          files: |
+            dist/*.exe
+            dist/*.blockmap
