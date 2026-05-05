@@ -25,6 +25,7 @@
       "main": "electron/main.js"
     },
     "win": {
+      "icon": "build/icon.ico",
       "signAndEditExecutable": false,
       "target": [
         "portable"
