@@ -1,4 +1,4 @@
 {
-  "ocrBackendRepo": "https://github.com/loise888999/OcrTradingBackend.git",
-  "frontendRepo": "https://github.com/loise888999/OcrTrading.git"
+  "ocrBackendRepo": "https://github.com/loise888999/OcrTradingBackend",
+  "frontendRepo": "https://github.com/loise888999/OcrTradingFrontend"
 }

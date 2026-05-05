@@ -3,7 +3,7 @@
 This repository creates a Windows `.exe` release when you manually trigger it after your OCR backend and frontend repos are ready.
 
 Configured repositories:
-- Frontend: `https://github.com/loise888999/OcrTrading`
+- Frontend: `https://github.com/loise888999/OcrTradingFrontend`
 - Backend: `https://github.com/loise888999/OcrTradingBackend`
 
 ## One-time setup in this repo
@@ -17,14 +17,13 @@ Add secret for private external repositories (optional if repos are public):
 1. Push this repo to GitHub.
 2. Open **Actions** → **Release Windows App**.
 3. Click **Run workflow**.
-4. Default repo URLs are pre-filled:
-   - `ocr_backend_repo`: `https://github.com/loise888999/OcrTradingBackend.git`
-   - `frontend_repo`: `https://github.com/loise888999/OcrTrading.git`
-5. Fill/confirm:
+4. Fill/confirm:
    - `release_tag` in semver format like `v1.0.0`
-   - `ocr_backend_ref` and `frontend_ref` (branch/tag/commit)
    - optional `backend_entry` (default: `server.js`)
    - optional `frontend_url`
+5. Workflow will always clone these fixed repositories from `main`:
+   - Backend: `https://github.com/loise888999/OcrTradingBackend`
+   - Frontend: `https://github.com/loise888999/OcrTradingFrontend`
 6. Workflow will:
    - clone both repos
    - prepare and verify `bundle/`

@@ -6,22 +6,6 @@ on:
       release_tag:
         description: "Release tag (example: v1.0.0)"
         required: true
-      ocr_backend_repo:
-        description: "Git URL for OCR backend repo"
-        required: true
-        default: "https://github.com/loise888999/OcrTradingBackend.git"
-      ocr_backend_ref:
-        description: "Branch/tag/commit for OCR backend"
-        required: false
-        default: "main"
-      frontend_repo:
-        description: "Git URL for frontend repo"
-        required: true
-        default: "https://github.com/loise888999/OcrTrading.git"
-      frontend_ref:
-        description: "Branch/tag/commit for frontend"
-        required: false
-        default: "main"
       backend_entry:
         description: "Backend startup file path relative to backend repo"
         required: false
@@ -30,6 +14,12 @@ on:
         description: "Optional URL to load in Electron instead of bundled backend URL"
         required: false
         default: ""
+
+env:
+  OCR_BACKEND_REPO: https://github.com/loise888999/OcrTradingBackend
+  OCR_BACKEND_REF: main
+  FRONTEND_REPO: https://github.com/loise888999/OcrTradingFrontend
+  FRONTEND_REF: main
 
 permissions:
   contents: write
@@ -54,21 +44,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
 
       - name: Clone OCR backend repo
         shell: bash
         env:
           REPO_TOKEN: ${{ secrets.EXTERNAL_REPO_TOKEN }}
         run: |
-          node scripts/clone-repo.js "${{ github.event.inputs.ocr_backend_repo }}" "${{ github.event.inputs.ocr_backend_ref }}" "external/ocr-backend"
+          node scripts/clone-repo.js "$OCR_BACKEND_REPO" "$OCR_BACKEND_REF" "external/ocr-backend"
 
       - name: Clone frontend repo
         shell: bash
         env:
           REPO_TOKEN: ${{ secrets.EXTERNAL_REPO_TOKEN }}
         run: |
-          node scripts/clone-repo.js "${{ github.event.inputs.frontend_repo }}" "${{ github.event.inputs.frontend_ref }}" "external/frontend"
+          node scripts/clone-repo.js "$FRONTEND_REPO" "$FRONTEND_REF" "external/frontend"
 
       - name: Install app dependencies
         run: npm ci
