@@ -6,6 +6,22 @@ Configured repositories:
 - Frontend: `https://github.com/loise888999/OcrTradingFrontend`
 - Backend: `https://github.com/loise888999/OcrTradingBackend`
 
+## User-editable files
+
+The portable app creates this folder beside the `.exe` on first run:
+
+```text
+UwoToolt Trading Compagnion Data
+```
+
+Users can edit or back up these files there while the app is closed:
+
+- `appsettings.json`
+- `Data/cities.csv`
+- `Data/trade-goods.csv`
+- `Data/pending-trade-goods.json`
+- `ocr-trading.db`
+
 ## One-time setup in this repo
 
 Add secret for private external repositories (optional if repos are public):

@@ -28,6 +28,55 @@ function getBackendEntryPath(config) {
   return backendEntry.replace(`${path.sep}app.asar${path.sep}`, `${path.sep}app.asar.unpacked${path.sep}`);
 }
 
+function getUserFilesDir() {
+  const portableDir = process.env.PORTABLE_EXECUTABLE_DIR;
+  const baseDir = portableDir || path.dirname(process.execPath);
+
+  if (app.isPackaged && baseDir && fs.existsSync(baseDir)) {
+    return path.join(baseDir, 'UwoToolt Trading Compagnion Data');
+  }
+
+  return path.join(app.getPath('userData'), 'User Files');
+}
+
+function copyMissing(source, destination) {
+  if (!fs.existsSync(source) || fs.existsSync(destination)) {
+    return;
+  }
+
+  fs.cpSync(source, destination, { recursive: true });
+}
+
+function prepareUserFiles(backendDir) {
+  const userFilesDir = getUserFilesDir();
+  fs.mkdirSync(userFilesDir, { recursive: true });
+
+  copyMissing(path.join(backendDir, 'appsettings.json'), path.join(userFilesDir, 'appsettings.json'));
+  copyMissing(path.join(backendDir, 'Data'), path.join(userFilesDir, 'Data'));
+
+  const readmePath = path.join(userFilesDir, 'README.txt');
+  if (!fs.existsSync(readmePath)) {
+    fs.writeFileSync(
+      readmePath,
+      [
+        'UwoToolt Trading Compagnion user files',
+        '',
+        'You can edit these files while the app is closed:',
+        '- appsettings.json',
+        '- Data\\cities.csv',
+        '- Data\\trade-goods.csv',
+        '- Data\\pending-trade-goods.json',
+        '- ocr-trading.db',
+        '',
+        'The SQLite database is created here after the backend starts.',
+        'Back up this folder before making large manual edits.'
+      ].join('\r\n')
+    );
+  }
+
+  return userFilesDir;
+}
+
 function startBackend(config) {
   const backendEntry = getBackendEntryPath(config);
 
@@ -38,9 +87,11 @@ function startBackend(config) {
   const extension = path.extname(backendEntry).toLowerCase();
   const command = extension === '.js' ? process.execPath : extension === '.dll' ? 'dotnet' : backendEntry;
   const args = extension === '.js' || extension === '.dll' ? [backendEntry] : [];
+  const backendDir = path.dirname(backendEntry);
+  const userFilesDir = prepareUserFiles(backendDir);
 
   backendProcess = spawn(command, args, {
-    cwd: path.dirname(backendEntry),
+    cwd: userFilesDir,
     env: { ...process.env, PORT: String(config.backendPort || 5000) },
     stdio: 'inherit'
   });
