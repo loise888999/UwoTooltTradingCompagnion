@@ -17,14 +17,19 @@ function getRuntimeConfig() {
 }
 
 function startBackend(config) {
-  const backendEntry = path.join(__dirname, '..', 'bundle', 'ocr-backend', config.backendEntryRel || 'server.js');
+  const backendEntry = path.join(__dirname, '..', 'bundle', 'ocr-backend', config.backendEntryRel || 'OcrTradingBackend.exe');
 
   if (!fs.existsSync(backendEntry)) {
     throw new Error(`Backend entry not found: ${backendEntry}`);
   }
 
-  backendProcess = spawn(process.execPath, [backendEntry], {
-    env: { ...process.env, PORT: String(config.backendPort || 3210) },
+  const extension = path.extname(backendEntry).toLowerCase();
+  const command = extension === '.js' ? process.execPath : extension === '.dll' ? 'dotnet' : backendEntry;
+  const args = extension === '.js' || extension === '.dll' ? [backendEntry] : [];
+
+  backendProcess = spawn(command, args, {
+    cwd: path.dirname(backendEntry),
+    env: { ...process.env, PORT: String(config.backendPort || 5000) },
     stdio: 'inherit'
   });
 
@@ -51,7 +56,7 @@ app.whenReady().then(() => {
     const config = getRuntimeConfig();
     startBackend(config);
 
-    const url = config.frontendUrl || `http://127.0.0.1:${config.backendPort || 3210}`;
+    const url = config.frontendUrl || `http://127.0.0.1:${config.backendPort || 5000}`;
 
     setTimeout(() => {
       createWindow(url);

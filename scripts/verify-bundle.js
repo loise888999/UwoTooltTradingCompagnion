@@ -9,7 +9,7 @@ if (!fs.existsSync(cfgPath)) {
 }
 
 const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-const backendPath = path.join(root, 'bundle', 'ocr-backend', cfg.backendEntryRel || 'server.js');
+const backendPath = path.join(root, 'bundle', 'ocr-backend', cfg.backendEntryRel || 'OcrTradingBackend.exe');
 
 if (!fs.existsSync(backendPath)) {
   throw new Error(`Backend entry from runtime-config not found: ${backendPath}`);

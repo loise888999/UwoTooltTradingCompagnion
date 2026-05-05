@@ -3,13 +3,14 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const backendRepoDir = path.join(root, 'external', 'ocr-backend');
+const backendPublishDir = path.join(root, 'external', 'ocr-backend-publish');
 const frontendRepoDir = path.join(root, 'external', 'frontend');
 
 const bundleDir = path.join(root, 'bundle');
 const bundleBackendDir = path.join(bundleDir, 'ocr-backend');
 const bundleFrontendDir = path.join(bundleDir, 'frontend');
 
-const backendEntryRel = process.env.OCR_BACKEND_ENTRY_REL || 'server.js';
+const backendEntryRel = process.env.OCR_BACKEND_ENTRY_REL || 'OcrTradingBackend.exe';
 const frontendUrl = process.env.FRONTEND_URL || '';
 
 function ensureDir(dir) {
@@ -43,7 +44,7 @@ if (!fs.existsSync(frontendRepoDir)) {
 fs.rmSync(bundleDir, { recursive: true, force: true });
 ensureDir(bundleDir);
 
-copyDir(backendRepoDir, bundleBackendDir);
+copyDir(fs.existsSync(backendPublishDir) ? backendPublishDir : backendRepoDir, bundleBackendDir);
 copyDir(frontendRepoDir, bundleFrontendDir);
 
 const runtimeConfigPath = path.join(bundleDir, 'runtime-config.json');
@@ -53,7 +54,7 @@ fs.writeFileSync(
     {
       backendEntryRel,
       frontendUrl,
-      backendPort: process.env.BACKEND_PORT || 3210
+      backendPort: process.env.BACKEND_PORT || 5000
     },
     null,
     2

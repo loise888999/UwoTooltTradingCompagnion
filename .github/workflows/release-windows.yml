@@ -7,9 +7,9 @@ on:
         description: "Release tag (example: v1.0.0)"
         required: true
       backend_entry:
-        description: "Backend startup file path relative to backend repo"
+        description: "Backend startup file path relative to published backend"
         required: false
-        default: "server.js"
+        default: "OcrTradingBackend.exe"
       frontend_url:
         description: "Optional URL to load in Electron instead of bundled backend URL"
         required: false
@@ -45,6 +45,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Clone OCR backend repo
         shell: bash
         env:
@@ -61,6 +66,15 @@ jobs:
 
       - name: Install app dependencies
         run: npm ci
+
+      - name: Publish OCR backend
+        shell: bash
+        run: |
+          dotnet publish external/ocr-backend/OcrTradingBackend.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained false \
+            -o external/ocr-backend-publish
 
       - name: Prepare bundle from external repos
         shell: bash
