@@ -1,0 +1,22 @@
+const fs = require('fs');
+const path = require('path');
+
+const root = path.join(__dirname, '..');
+const cfgPath = path.join(root, 'bundle', 'runtime-config.json');
+
+if (!fs.existsSync(cfgPath)) {
+  throw new Error('bundle/runtime-config.json missing');
+}
+
+const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+const backendPath = path.join(root, 'bundle', 'ocr-backend', cfg.backendEntryRel || 'server.js');
+
+if (!fs.existsSync(backendPath)) {
+  throw new Error(`Backend entry from runtime-config not found: ${backendPath}`);
+}
+
+if (!fs.existsSync(path.join(root, 'bundle', 'frontend'))) {
+  throw new Error('bundle/frontend missing');
+}
+
+console.log('Bundle verification passed.');

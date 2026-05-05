@@ -1,0 +1,34 @@
+{
+  "name": "uwotoolt-trading-compagnion",
+  "version": "0.3.0",
+  "description": "Electron shell that packages external OCR backend and frontend repositories",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "setup:repos": "node scripts/setup-repos.js",
+    "prepare:bundle": "node scripts/prepare-bundle.js",
+    "build:win": "electron-builder --win nsis",
+    "verify:bundle": "node scripts/verify-bundle.js"
+  },
+  "build": {
+    "appId": "com.uwotoolt.tradingcompagnion",
+    "productName": "UwoToolt Trading Compagnion",
+    "files": [
+      "electron/**/*",
+      "bundle/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3"
+  }
+}
