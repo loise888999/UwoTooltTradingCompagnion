@@ -18,6 +18,9 @@
       "bundle/**/*",
       "package.json"
     ],
+    "asarUnpack": [
+      "bundle/ocr-backend/**"
+    ],
     "extraMetadata": {
       "main": "electron/main.js"
     },

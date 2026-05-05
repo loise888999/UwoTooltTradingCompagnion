@@ -16,8 +16,18 @@ function getRuntimeConfig() {
   return JSON.parse(fs.readFileSync(configPath, 'utf8'));
 }
 
-function startBackend(config) {
+function getBackendEntryPath(config) {
   const backendEntry = path.join(__dirname, '..', 'bundle', 'ocr-backend', config.backendEntryRel || 'OcrTradingBackend.exe');
+
+  if (!app.isPackaged) {
+    return backendEntry;
+  }
+
+  return backendEntry.replace(`${path.sep}app.asar${path.sep}`, `${path.sep}app.asar.unpacked${path.sep}`);
+}
+
+function startBackend(config) {
+  const backendEntry = getBackendEntryPath(config);
 
   if (!fs.existsSync(backendEntry)) {
     throw new Error(`Backend entry not found: ${backendEntry}`);
