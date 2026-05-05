@@ -7,7 +7,7 @@
     "start": "electron .",
     "setup:repos": "node scripts/setup-repos.js",
     "prepare:bundle": "node scripts/prepare-bundle.js",
-    "build:win": "electron-builder --win nsis",
+    "build:win": "electron-builder --win nsis --publish never",
     "verify:bundle": "node scripts/verify-bundle.js"
   },
   "build": {
