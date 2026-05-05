@@ -87,7 +87,7 @@ jobs:
         shell: bash
         run: node scripts/verify-bundle.js
 
-      - name: Build Windows installer
+      - name: Build portable Windows app
         run: npm run build:win
 
       - name: Publish GitHub release
@@ -98,4 +98,3 @@ jobs:
           generate_release_notes: true
           files: |
             dist/*.exe
-            dist/*.blockmap

@@ -1,6 +1,6 @@
 # UwoToolt Trading Compagnion - Release Shell
 
-This repository creates a Windows `.exe` release when you manually trigger it after your OCR backend and frontend repos are ready.
+This repository creates a portable Windows `.exe` release when you manually trigger it after your OCR backend and frontend repos are ready.
 
 Configured repositories:
 - Frontend: `https://github.com/loise888999/OcrTradingFrontend`
@@ -28,7 +28,7 @@ Add secret for private external repositories (optional if repos are public):
    - clone both repos
    - publish the .NET backend
    - prepare and verify `bundle/`
-   - build Windows installer
+   - build portable Windows app
    - create GitHub Release with `.exe` artifact
 
 ## Local test flow
@@ -41,7 +41,7 @@ npm run verify:bundle
 npm start
 ```
 
-## Build installer locally
+## Build portable app locally
 
 ```bash
 npm run build:win
