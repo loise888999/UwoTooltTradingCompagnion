@@ -71,7 +71,7 @@ jobs:
           node scripts/clone-repo.js "${{ github.event.inputs.frontend_repo }}" "${{ github.event.inputs.frontend_ref }}" "external/frontend"
 
       - name: Install app dependencies
-        run: npm install
+        run: npm ci
 
       - name: Prepare bundle from external repos
         shell: bash
