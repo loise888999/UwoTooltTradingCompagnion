@@ -16,17 +16,19 @@
     "files": [
       "electron/**/*",
       "bundle/**/*",
+      "build/icon.ico",
       "package.json"
     ],
     "asarUnpack": [
-      "bundle/ocr-backend/**"
+      "bundle/ocr-backend/**",
+      "build/icon.ico"
     ],
     "extraMetadata": {
       "main": "electron/main.js"
     },
     "win": {
       "icon": "build/icon.ico",
-      "signAndEditExecutable": false,
+      "signAndEditExecutable": true,
       "target": [
         "portable"
       ]

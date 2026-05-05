@@ -131,6 +131,16 @@ function getContentType(filePath) {
   }
 }
 
+function getWindowIconPath() {
+  const iconPath = path.join(__dirname, '..', 'build', 'icon.ico');
+
+  if (!app.isPackaged) {
+    return iconPath;
+  }
+
+  return iconPath.replace(`${path.sep}app.asar${path.sep}`, `${path.sep}app.asar.unpacked${path.sep}`);
+}
+
 function startFrontendServer(config) {
   const frontendDir = getFrontendDir();
   const indexPath = path.join(frontendDir, 'index.html');
@@ -161,6 +171,7 @@ function createWindow(loadUrl) {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: getWindowIconPath(),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false
