@@ -5,6 +5,7 @@ const root = path.join(__dirname, '..');
 const backendRepoDir = path.join(root, 'external', 'ocr-backend');
 const backendPublishDir = path.join(root, 'external', 'ocr-backend-publish');
 const frontendRepoDir = path.join(root, 'external', 'frontend');
+const frontendBuildDir = path.join(frontendRepoDir, 'dist');
 
 const bundleDir = path.join(root, 'bundle');
 const bundleBackendDir = path.join(bundleDir, 'ocr-backend');
@@ -45,7 +46,7 @@ fs.rmSync(bundleDir, { recursive: true, force: true });
 ensureDir(bundleDir);
 
 copyDir(fs.existsSync(backendPublishDir) ? backendPublishDir : backendRepoDir, bundleBackendDir);
-copyDir(frontendRepoDir, bundleFrontendDir);
+copyDir(fs.existsSync(frontendBuildDir) ? frontendBuildDir : frontendRepoDir, bundleFrontendDir);
 
 const runtimeConfigPath = path.join(bundleDir, 'runtime-config.json');
 fs.writeFileSync(
@@ -54,7 +55,8 @@ fs.writeFileSync(
     {
       backendEntryRel,
       frontendUrl,
-      backendPort: process.env.BACKEND_PORT || 5000
+      backendPort: process.env.BACKEND_PORT || 5000,
+      frontendPort: process.env.FRONTEND_PORT || 5173
     },
     null,
     2

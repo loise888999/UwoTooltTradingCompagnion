@@ -2,9 +2,11 @@ const { app, BrowserWindow, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const http = require('http');
 
 let mainWindow;
 let backendProcess;
+let frontendServer;
 
 function getRuntimeConfig() {
   const configPath = path.join(__dirname, '..', 'bundle', 'runtime-config.json');
@@ -48,6 +50,62 @@ function startBackend(config) {
   });
 }
 
+function getFrontendDir() {
+  return path.join(__dirname, '..', 'bundle', 'frontend');
+}
+
+function getContentType(filePath) {
+  const extension = path.extname(filePath).toLowerCase();
+
+  switch (extension) {
+    case '.html':
+      return 'text/html; charset=utf-8';
+    case '.js':
+      return 'text/javascript; charset=utf-8';
+    case '.css':
+      return 'text/css; charset=utf-8';
+    case '.json':
+      return 'application/json; charset=utf-8';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.ico':
+      return 'image/x-icon';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+function startFrontendServer(config) {
+  const frontendDir = getFrontendDir();
+  const indexPath = path.join(frontendDir, 'index.html');
+
+  if (!fs.existsSync(indexPath)) {
+    throw new Error(`Frontend entry not found: ${indexPath}`);
+  }
+
+  frontendServer = http.createServer((request, response) => {
+    const requestUrl = new URL(request.url || '/', `http://${request.headers.host || '127.0.0.1'}`);
+    const requestedPath = decodeURIComponent(requestUrl.pathname);
+    const relativePath = requestedPath === '/' ? 'index.html' : requestedPath.slice(1);
+    const filePath = path.normalize(path.join(frontendDir, relativePath));
+    const safeRoot = path.normalize(frontendDir + path.sep);
+
+    const resolvedPath = filePath.startsWith(safeRoot) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()
+      ? filePath
+      : indexPath;
+
+    response.writeHead(200, { 'Content-Type': getContentType(resolvedPath) });
+    fs.createReadStream(resolvedPath).pipe(response);
+  });
+
+  frontendServer.listen(Number(config.frontendPort || 5173), 'localhost');
+}
+
 function createWindow(loadUrl) {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -65,8 +123,9 @@ app.whenReady().then(() => {
   try {
     const config = getRuntimeConfig();
     startBackend(config);
+    startFrontendServer(config);
 
-    const url = config.frontendUrl || `http://127.0.0.1:${config.backendPort || 5000}`;
+    const url = config.frontendUrl || `http://localhost:${config.frontendPort || 5173}`;
 
     setTimeout(() => {
       createWindow(url);
@@ -84,5 +143,9 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   if (backendProcess && !backendProcess.killed) {
     backendProcess.kill();
+  }
+
+  if (frontendServer) {
+    frontendServer.close();
   }
 });

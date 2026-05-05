@@ -15,8 +15,14 @@ if (!fs.existsSync(backendPath)) {
   throw new Error(`Backend entry from runtime-config not found: ${backendPath}`);
 }
 
-if (!fs.existsSync(path.join(root, 'bundle', 'frontend'))) {
+const frontendPath = path.join(root, 'bundle', 'frontend');
+
+if (!fs.existsSync(frontendPath)) {
   throw new Error('bundle/frontend missing');
+}
+
+if (!fs.existsSync(path.join(frontendPath, 'index.html'))) {
+  throw new Error('bundle/frontend/index.html missing');
 }
 
 console.log('Bundle verification passed.');

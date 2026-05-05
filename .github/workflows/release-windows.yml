@@ -76,6 +76,15 @@ jobs:
             --self-contained false \
             -o external/ocr-backend-publish
 
+      - name: Build frontend
+        shell: bash
+        env:
+          VITE_API_BASE_URL: http://127.0.0.1:5000
+        run: |
+          cd external/frontend
+          npm install
+          npm run build
+
       - name: Prepare bundle from external repos
         shell: bash
         env:

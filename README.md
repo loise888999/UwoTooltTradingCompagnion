@@ -27,6 +27,7 @@ Add secret for private external repositories (optional if repos are public):
 6. Workflow will:
    - clone both repos
    - publish the .NET backend
+   - build the frontend
    - prepare and verify `bundle/`
    - build portable Windows app
    - create GitHub Release with `.exe` artifact
