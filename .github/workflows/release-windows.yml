@@ -67,6 +67,12 @@ jobs:
       - name: Install app dependencies
         run: npm ci
 
+      - name: Apply release version to app metadata
+        shell: bash
+        run: |
+          APP_VERSION="${{ github.event.inputs.release_tag }}"
+          npm version "${APP_VERSION#v}" --no-git-tag-version
+
       - name: Publish OCR backend
         shell: bash
         run: |
@@ -98,6 +104,10 @@ jobs:
 
       - name: Build portable Windows app
         run: npm run build:win
+
+      - name: List release files
+        shell: bash
+        run: ls -la dist/*.exe
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2

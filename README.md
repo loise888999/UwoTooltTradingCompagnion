@@ -42,6 +42,7 @@ Add secret for private external repositories (optional if repos are public):
    - Frontend: `https://github.com/loise888999/OcrTradingFrontend`
 6. Workflow will:
    - clone both repos
+   - apply `release_tag` to the app package version
    - publish the .NET backend
    - build the frontend
    - prepare and verify `bundle/`

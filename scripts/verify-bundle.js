@@ -25,4 +25,29 @@ if (!fs.existsSync(path.join(frontendPath, 'index.html'))) {
   throw new Error('bundle/frontend/index.html missing');
 }
 
+function findPowerShellFiles(dir) {
+  const found = [];
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      found.push(...findPowerShellFiles(entryPath));
+      continue;
+    }
+
+    if (/\.(ps1|psm1|psd1)$/i.test(entry.name)) {
+      found.push(entryPath);
+    }
+  }
+
+  return found;
+}
+
+const powerShellFiles = findPowerShellFiles(path.join(root, 'bundle'));
+
+if (powerShellFiles.length > 0) {
+  throw new Error(`PowerShell scripts must not be bundled:\n${powerShellFiles.join('\n')}`);
+}
+
 console.log('Bundle verification passed.');

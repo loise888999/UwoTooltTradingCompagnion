@@ -32,6 +32,9 @@
       "target": [
         "portable"
       ]
+    },
+    "nsis": {
+      "installerIcon": "build/icon.ico"
     }
   },
   "devDependencies": {

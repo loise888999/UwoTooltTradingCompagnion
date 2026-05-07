@@ -29,6 +29,7 @@ function copyDir(source, destination) {
       const normalized = src.replace(/\\/g, '/');
       if (normalized.includes('/.git')) return false;
       if (normalized.includes('/node_modules')) return false;
+      if (/\.(ps1|psm1|psd1)$/i.test(normalized)) return false;
       return true;
     }
   });
