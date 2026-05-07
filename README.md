@@ -1,4 +1,4 @@
-# UwoToolt Trading Compagnion - Release Shell
+# UwoTool Trading Compagnion - Release Shell
 
 This repository creates a portable Windows `.exe` release when you manually trigger it after your OCR backend and frontend repos are ready.
 
@@ -11,7 +11,7 @@ Configured repositories:
 The portable app creates this folder beside the `.exe` on first run:
 
 ```text
-UwoToolt Trading Compagnion Data
+UwoTool Trading Compagnion Data
 ```
 
 Users can edit or back up these files there while the app is closed:
@@ -31,7 +31,7 @@ Add secret for private external repositories (optional if repos are public):
 ## Manual GitHub Release (recommended)
 
 1. Push this repo to GitHub.
-2. Open **Actions** → **Release Windows App**.
+2. Open **Actions** -> **Release Windows App**.
 3. Click **Run workflow**.
 4. Fill/confirm:
    - `release_tag` in semver format like `v1.0.0`
@@ -61,5 +61,7 @@ npm start
 ## Build portable app locally
 
 ```bash
+npm run prepare:bundle
+npm run verify:bundle
 npm run build:win
 ```

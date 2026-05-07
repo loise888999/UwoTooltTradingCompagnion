@@ -33,7 +33,7 @@ function getUserFilesDir() {
   const baseDir = portableDir || path.dirname(process.execPath);
 
   if (app.isPackaged && baseDir && fs.existsSync(baseDir)) {
-    return path.join(baseDir, 'UwoToolt Trading Compagnion Data');
+    return path.join(baseDir, 'UwoTool Trading Compagnion Data');
   }
 
   return path.join(app.getPath('userData'), 'User Files');
@@ -59,7 +59,7 @@ function prepareUserFiles(backendDir) {
     fs.writeFileSync(
       readmePath,
       [
-        'UwoToolt Trading Compagnion user files',
+        'UwoTool Trading Compagnion user files',
         '',
         'You can edit these files while the app is closed:',
         '- appsettings.json',

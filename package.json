@@ -1,5 +1,5 @@
 {
-  "name": "uwotoolt-trading-compagnion",
+  "name": "uwotool-trading-compagnion",
   "version": "0.3.0",
   "description": "Electron shell that packages external OCR backend and frontend repositories",
   "main": "electron/main.js",
@@ -11,8 +11,8 @@
     "verify:bundle": "node scripts/verify-bundle.js"
   },
   "build": {
-    "appId": "com.uwotoolt.tradingcompagnion",
-    "productName": "UwoToolt Trading Compagnion",
+    "appId": "com.uwotool.tradingcompagnion",
+    "productName": "UwoTool Trading Compagnion",
     "files": [
       "electron/**/*",
       "bundle/**/*",
@@ -28,7 +28,7 @@
     },
     "win": {
       "icon": "build/icon.ico",
-      "signAndEditExecutable": true,
+      "signAndEditExecutable": false,
       "target": [
         "portable"
       ]
