@@ -141,31 +141,141 @@ function getWindowIconPath() {
   return iconPath.replace(`${path.sep}app.asar${path.sep}`, `${path.sep}app.asar.unpacked${path.sep}`);
 }
 
-function setupDisplayCaptureSession() {
-  session.defaultSession.setDisplayMediaRequestHandler(
-    async (_request, callback) => {
-      try {
-        const sources = await desktopCapturer.getSources({
-          types: ['window', 'screen']
+function normalizeCaptureText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function uniq(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function requestJson({ port, path: requestPath, timeoutMs = 1500 }) {
+  return new Promise((resolve) => {
+    const request = http.get(
+      {
+        host: '127.0.0.1',
+        port,
+        path: requestPath,
+        timeout: timeoutMs
+      },
+      (response) => {
+        let body = '';
+
+        response.setEncoding('utf8');
+        response.on('data', (chunk) => {
+          body += chunk;
         });
-        const preferredSource =
-          sources.find((source) => source.name.toLowerCase().includes('screen')) ||
-          sources[0];
+        response.on('end', () => {
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            resolve(null);
+            return;
+          }
 
-        if (!preferredSource) {
-          console.warn('No display capture sources found.');
-          callback({});
-          return;
-        }
-
-        callback({ video: preferredSource });
-      } catch (error) {
-        console.error('Display capture request failed:', error);
-        callback({});
+          try {
+            resolve(JSON.parse(body));
+          } catch (error) {
+            console.warn(`Could not parse backend response from ${requestPath}:`, error);
+            resolve(null);
+          }
+        });
       }
-    },
-    { useSystemPicker: true }
-  );
+    );
+
+    request.on('timeout', () => {
+      request.destroy();
+      resolve(null);
+    });
+    request.on('error', () => {
+      resolve(null);
+    });
+  });
+}
+
+async function getSelectedGameWindow(config) {
+  return requestJson({
+    port: Number(config.backendPort || 5000),
+    path: '/api/system/game-window'
+  });
+}
+
+function getGameWindowCandidateNames(gameWindow) {
+  const processName = gameWindow?.processName
+    ? String(gameWindow.processName).replace(/\.[^.]+$/, '')
+    : '';
+
+  return uniq([
+    normalizeCaptureText(gameWindow?.title),
+    normalizeCaptureText(gameWindow?.windowTitle),
+    normalizeCaptureText(gameWindow?.name),
+    normalizeCaptureText(processName)
+  ]).filter((candidate) => candidate.length >= 3);
+}
+
+function isOwnAppWindow(sourceName) {
+  return sourceName.includes('uwotool') ||
+    sourceName.includes('trading compagnion') ||
+    sourceName.includes('trading companion');
+}
+
+function sourceMatchesCandidate(sourceName, candidate) {
+  return sourceName === candidate ||
+    sourceName.includes(candidate) ||
+    candidate.includes(sourceName);
+}
+
+function findGameWindowSource(sources, gameWindow) {
+  const namedCandidates = getGameWindowCandidateNames(gameWindow);
+
+  for (const candidate of namedCandidates) {
+    const matchedSource = sources.find((source) => {
+      const sourceName = normalizeCaptureText(source.name);
+      return !isOwnAppWindow(sourceName) && sourceMatchesCandidate(sourceName, candidate);
+    });
+
+    if (matchedSource) return matchedSource;
+  }
+
+  return sources.find((source) => {
+    const sourceName = normalizeCaptureText(source.name);
+
+    if (isOwnAppWindow(sourceName)) return false;
+    if (sourceName.includes('uncharted')) return true;
+    return sourceName.includes('uwo') && !sourceName.includes('uwotool');
+  });
+}
+
+function setupDisplayCaptureSession(config) {
+  session.defaultSession.setDisplayMediaRequestHandler(async (_request, callback) => {
+    try {
+      const [sources, gameWindow] = await Promise.all([
+        desktopCapturer.getSources({
+          types: ['window'],
+          thumbnailSize: { width: 0, height: 0 }
+        }),
+        getSelectedGameWindow(config)
+      ]);
+
+      const gameWindowSource = findGameWindowSource(sources, gameWindow);
+
+      if (!gameWindowSource) {
+        const selectedTitle = gameWindow?.title || gameWindow?.windowTitle || gameWindow?.name || 'none';
+        console.warn(
+          `No matching game window source found for OCR capture. Selected game window: ${selectedTitle}. ` +
+          `Available windows: ${sources.map((source) => source.name).join(', ')}`
+        );
+        callback({});
+        return;
+      }
+
+      callback({ video: gameWindowSource });
+    } catch (error) {
+      console.error('Display capture request failed:', error);
+      callback({});
+    }
+  });
 }
 
 function startFrontendServer(config) {
@@ -213,7 +323,7 @@ app.whenReady().then(() => {
     const config = getRuntimeConfig();
     startBackend(config);
     startFrontendServer(config);
-    setupDisplayCaptureSession();
+    setupDisplayCaptureSession(config);
 
     const url = config.frontendUrl || `http://localhost:${config.frontendPort || 5173}`;
 
