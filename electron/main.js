@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, desktopCapturer, dialog, session } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -141,6 +141,33 @@ function getWindowIconPath() {
   return iconPath.replace(`${path.sep}app.asar${path.sep}`, `${path.sep}app.asar.unpacked${path.sep}`);
 }
 
+function setupDisplayCaptureSession() {
+  session.defaultSession.setDisplayMediaRequestHandler(
+    async (_request, callback) => {
+      try {
+        const sources = await desktopCapturer.getSources({
+          types: ['window', 'screen']
+        });
+        const preferredSource =
+          sources.find((source) => source.name.toLowerCase().includes('screen')) ||
+          sources[0];
+
+        if (!preferredSource) {
+          console.warn('No display capture sources found.');
+          callback({});
+          return;
+        }
+
+        callback({ video: preferredSource });
+      } catch (error) {
+        console.error('Display capture request failed:', error);
+        callback({});
+      }
+    },
+    { useSystemPicker: true }
+  );
+}
+
 function startFrontendServer(config) {
   const frontendDir = getFrontendDir();
   const indexPath = path.join(frontendDir, 'index.html');
@@ -186,6 +213,7 @@ app.whenReady().then(() => {
     const config = getRuntimeConfig();
     startBackend(config);
     startFrontendServer(config);
+    setupDisplayCaptureSession();
 
     const url = config.frontendUrl || `http://localhost:${config.frontendPort || 5173}`;
 
